@@ -1,33 +1,40 @@
-<img src="LibreWolf-WinUpdater.ico" align="right">
+<img src="Thorium-WinUpdater.ico" align="right">
 
-# LibreWolf WinUpdater
+# Thorium WinUpdater
 by ltGuillaume: [Codeberg](https://codeberg.org/ltGuillaume) | [GitHub](https://github.com/ltGuillaume) | [Buy me a beer](https://buymeacoff.ee/ltGuillaume) 🍺
 
-An attempt to make updating LibreWolf for Windows much easier.
+An attempt to make updating [Thorium for Windows](https://github.com/Alex313031/Thorium-Win-AVX2) much easier. This is a fork of [LibreWolf WinUpdater](https://codeberg.org/ltGuillaume/librewolf-winupdater).
 
-![LibreWolf WinUpdater](SCREENSHOT.png)
+![Thorium WinUpdater](SCREENSHOT.png)
 
 ## Getting started
-- If you want to run the portable version of LibreWolf, download and extract [`librewolf-xxx.x.x-windows-x86_64-portable.zip`](https://librewolf.net/installation/windows/) (second blue button). It already contains a compiled version of the project hosted here.  
-  LibreWolf will be updated automatically whenever you run `LibreWolf-Portable.exe`  (checks for new versions happen once a day). If you wish to perform update checks manually instead, just rename WinUpdater to e.g. `LibreWolf-ManualUpdater.exe` and run it when needed.
-- When installing LibreWolf, the [official installer](https://librewolf.net/installation/windows/) will show an option to install WinUpdater.  
-  Alternatively, you can download and extract the latest [`LibreWolf-WinUpdater_x.x.x.zip`](https://codeberg.org/ltGuillaume/LibreWolf-WinUpdater/releases) to a folder you like, e.g. `%AppData%\LibreWolf`. Run `LibreWolf-WinUpdater.exe` to check for an update. If one is available, it will be downloaded immediately.
+- If you want to run the portable version of Thorium, download and extract [`Thorium_AVX2_xxx.x.xxxx.x.zip`](https://github.com/Alex313031/Thorium-Win-AVX2/releases). Put `Thorium-WinUpdater.exe` in the same folder.  
+  Then, if you wish to perform an update, just run `Thorium-WinUpdater.exe`.
+- When you have installed Thorium using the [Thorium_AVX2_mini_installer.exe](https://github.com/Alex313031/Thorium-Win-AVX2/releases), just run `Thorium-WinUpdater.exe` from any place you like to check for updates. If one is available, it will be downloaded immediately.
 
 ## Scheduled updates
-- Run LibreWolf WinUpdater and select the option to automatically check for updates. This will prompt for administrator permissions and a blue (PowerShell) window will notify you of the result. The scheduled task will run while the current user account is logged on (at start-up and every 4 hours).
-- If your account has administrator permissions, the update will be fully automatic. If not, the update will be downloaded and you will be asked by WinUpdater to start the update (administrator permissions required).  
-- If LibreWolf is already running, the updater will notify you of the new version. The update will start as soon as you close the browser.
+- Run Thorium WinUpdater and select the option to automatically check for updates. This will prompt for administrator permissions and a blue (PowerShell) window will notify you of the result. The scheduled task will run while the current user account is logged on (at start-up and every 24 hours).
+- If your account has administrator permissions, the update will be fully automatic. If not, the update will be downloaded and you will be asked by WinUpdater to start the update.  
+- If Thorium is already running, the updater will notify you of the new version. The update will start as soon as you close the browser.
 
 ## Remarks
-- If you're having issues with the updater on __Windows 7__  (not officially supported by LibreWolf anymore), please have a look at [these instructions](https://codeberg.org/ltGuillaume/LibreWolf-WinUpdater/issues/15).
-- The updater needs to be able to write to `LibreWolf-WinUpdater.ini` in its own folder, (so make sure it has permission to do so), otherwise WinUpdater will copy itself to `%AppData%\LibreWolf\WinUpdater` and run from there.
-- `LibreWolf-WinUpdater.ini` contains a `[Log]` section that shows the results of the last update check and update action.
-- LibreWolf WinUpdater also updates itself automatically, so you won't have to check for new releases here. If you prefer to update WinUpdater yourself, add the following to the .ini file:
+- The updater needs to be able to write to `Thorium-WinUpdater.ini` in its own folder, (so make sure it has permission to do so), otherwise WinUpdater will copy itself to `%LocalAppData%\Thorium\WinUpdater` and run from there.
+- `Thorium-WinUpdater.ini` contains a `[Log]` section that shows the results of the last update check and update action.
+- Thorium WinUpdater also updates itself automatically, so you won't have to check for new releases here. If you prefer to update WinUpdater yourself, add the following to the .ini file:
   ```ini
   [Settings]
   UpdateSelf=0
   ```
+- Thorium by default downloads the AVX2 build. You can change the build to `Win` or `Win7` by adding the following to the .ini file:
+  ```ini
+  [Settings]
+  Build=Win7
+  ```
+  _Obviously, don't add the line `[Settings]` twice_.
+
 
 ## Credits
-* [LibreWolf](https://librewolf.net) by [ohfp](https://gitlab.com/ohfp), [stanzabird](https://stanzabird.nl), [fxbrit](https://gitlab.com/fxbrit), [maltejur](https://gitlab.com/maltejur), [bgstack15](https://bgstack15.wordpress.com) et al.
-* Original icon by the [LibreWolf Community](https://gitlab.com/librewolf-community/branding/-/tree/master/icon)
+* [Thorium](https://thorium.rocks) by [Alex Frick](https://github.com/Alex313031)
+* The Chromium Project
+* Original icon by the [Alex Frick](https://github.com/Alex313031/thorium/blob/main/logos/NEW/win/thorium.ico)
+* Original logo by the [Alex Frick](https://github.com/Alex313031/thorium/blob/main/logos/STAGING/Thorium90_252.jpg)

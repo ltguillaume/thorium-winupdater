@@ -1,12 +1,12 @@
-; LibreWolf WinUpdater - https://codeberg.org/ltguillaume/librewolf-winupdater
+; Thorium WinUpdater - https://codeberg.org/ltguillaume/thorium-winupdater
 ;@Ahk2Exe-SetFileVersion 1.7.11
 
 ;@Ahk2Exe-Base Unicode 32*
-;@Ahk2Exe-SetCompanyName LibreWolf Community
-;@Ahk2Exe-SetDescription LibreWolf WinUpdater
-;@Ahk2Exe-SetMainIcon LibreWolf-WinUpdater.ico
-;@Ahk2Exe-AddResource LibreWolf-WinUpdaterBlue.ico, 160
-;@Ahk2Exe-SetOrigFilename LibreWolf-WinUpdater.exe
+;@Ahk2Exe-SetCompanyName The Chromium Authors and Alex313031
+;@Ahk2Exe-SetDescription Thorium WinUpdater
+;@Ahk2Exe-SetMainIcon Thorium-WinUpdater.ico
+;@Ahk2Exe-AddResource Thorium-WinUpdaterLogo.ico, 160
+;@Ahk2Exe-SetOrigFilename Thorium-WinUpdater.exe
 ;@Ahk2Exe-PostExec ResourceHacker.exe -open "%A_WorkFileName%" -save "%A_WorkFileName%" -action delete -mask ICONGROUP`,206`, ,,,,1
 ;@Ahk2Exe-PostExec ResourceHacker.exe -open "%A_WorkFileName%" -save "%A_WorkFileName%" -action delete -mask ICONGROUP`,207`, ,,,,1
 ;@Ahk2Exe-PostExec ResourceHacker.exe -open "%A_WorkFileName%" -save "%A_WorkFileName%" -action delete -mask ICONGROUP`,208`, ,,,,1
@@ -15,25 +15,25 @@
 #SingleInstance, Off
 
 Global Args       := ""
-, ExtractDir      := A_Temp "\LibreWolf-Extracted"
-, LibreWolfExe    := "librewolf.exe"
-, PortableExe     := A_ScriptDir "\LibreWolf-Portable.exe"
-, SelfUpdateZip   := "LibreWolf-WinUpdater.zip"
+, ExtractDir      := A_Temp "\Thorium-Extracted"
+, ThoriumExe      := "thorium.exe"
+, PortableExe     := A_ScriptDir "\Thorium-Portable.exe"
+, SelfUpdateZip   := "Thorium-WinUpdater.zip"
 , TaskCreateFile  := "ScheduledTask-Create.ps1"
 , TaskRemoveFile  := "ScheduledTask-Remove.ps1"
-, UpdaterFile     := "LibreWolf-WinUpdater.exe"
-, IsPortable      := FileExist(A_ScriptDir "\LibreWolf-Portable.exe")
+, UpdaterFile     := "Thorium-WinUpdater.exe"
+, IsPortable      := FileExist(A_ScriptDir "\bin\thorium.exe")
 , RunningPortable := A_Args[1] = "/Portable"
 , Scheduled       := A_Args[1] = "/Scheduled"
 , SettingTask     := A_Args[1] = "/CreateTask" Or A_Args[1] = "/RemoveTask"
 , ChangesMade     := False
 , Done            := False
-, IniFile, Path, ProgramW6432, Build, UpdateSelf, Task, CurrentUpdaterVersion, ReleaseInfo, CurrentVersion, NewVersion, SetupFile, GuiHwnd, LogField, ProgField, VerField, TaskSetField, UpdateButton
+, IniFile, LocalAppData, Path, ProgramW6432, Build, UpdateSelf, Task, CurrentUpdaterVersion, ReleaseInfo, CurrentVersion, NewVersion, SetupFile, GuiHwnd, LogField, ProgField, VerField, TaskSetField, UpdateButton
 
 ; Strings
-Global _LibreWolf     := "LibreWolf"
-, _Updater            := "LibreWolf WinUpdater"
-, _NoConnectionError  := "Could not establish a connection to GitLab."
+Global _Thorium       := "Thorium"
+, _Updater            := "Thorium WinUpdater"
+, _NoConnectionError  := "Could not establish a connection to GitHub."
 , _IsRunningError     := _Updater " is already running."
 , _IsElevated         := "To set up scheduled tasks properly, please do not run WinUpdater as administrator."
 , _NoDefaultBrowser   := "Could not open your default browser."
@@ -41,11 +41,11 @@ Global _LibreWolf     := "LibreWolf"
 , _SetTask            := "Schedule a task for automatic update checks while`nuser {} is logged on."
 , _SettingTask        := (A_Args[1] = "/CreateTask" ? "Creating" : "Removing") " scheduled task..."
 , _Done               := " Done."
-, _GetPathError       := "Could not find the path to LibreWolf.`nBrowse to " LibreWolfExe " in the following dialog."
-, _SelectFileTitle    := _Updater " - Select " LibreWolfExe "..."
+, _GetPathError       := "Could not find the path to Thorium.`nBrowse to " ThoriumExe " in the following dialog."
+, _SelectFileTitle    := _Updater " - Select " ThoriumExe "..."
 , _WritePermError     := "Could not write to`n{}. Please check the current user account's write permissions for this folder."
 , _CopyError          := "Could not copy {}"
-, _GetBuildError      := "Could not determine the build architecture (32/64-bit) of LibreWolf."
+;, _GetBuildError      := "Could not determine the build architecture (32/64-bit) of Thorium."
 , _GetVersionError    := "Could not determine the current version of`n{}"
 , _DownloadJsonError  := "Could not download the {Task} releases file."
 , _JsonVersionError   := "Could not get version info from the {Task} releases file."
@@ -58,17 +58,17 @@ Global _LibreWolf     := "LibreWolf"
 , _FindChecksumError  := "Could not find the checksum for the downloaded file."
 , _ChecksumMatchError := "The file checksum did not match, so it's possible the download failed."
 , _ChangesMade        := "However, new files were written to the target folder!"
-, _NoChangesMade      := "No changes were made to your LibreWolf folder."
+, _NoChangesMade      := "No changes were made to your Thorium folder."
 , _Extracting         := "Extracting portable version..."
 , _StartUpdate        := "  &Start update  "
 , _Installing         := "Installing new version..."
 , _UpdateError        := "Error while updating."
 , _SilentUpdateError  := "Silent update did not complete.`nDo you want to run the interactive installer?"
-, _NewVersionFound    := "A new version is available.`nClose LibreWolf to start updating..."
+, _NewVersionFound    := "A new version is available.`nClose Thorium to start updating..."
 , _NoNewVersion       := "No new version found."
-, _ExtractionError    := "Could not extract the {Task} archive.`nMake sure LibreWolf is not running and restart the updater."
+, _ExtractionError    := "Could not extract the {Task} archive.`nMake sure Thorium is not running and restart the updater."
 , _MoveToTargetError  := "Could not move the following file into the target folder:`n{}"
-, _IsUpdated          := "LibreWolf has been updated."
+, _IsUpdated          := "Thorium has been updated."
 , _To                 := "to"
 , _GoToWebsite        := "<a>Restart WinUpdater</a> or visit the <a>project website</a> for help."
 
@@ -91,16 +91,18 @@ Exit()
 
 Init() {
 	EnvGet, ProgramW6432, ProgramW6432
+	EnvGet, LocalAppData, LocalAppData
 	SplitPath, A_ScriptFullPath,,,, BaseName
 	IniFile := A_ScriptDir "\" BaseName ".ini"
 	IniRead, UpdateSelf, %IniFile%, Settings, UpdateSelf, 1	; Using "False" in .ini causes If (UpdateSelf) to be True
+	IniRead, Build, %IniFile%, Settings, Build, Win-AVX2	; Win-AVX2, Win, Win7
 	FileGetVersion, CurrentUpdaterVersion, %A_ScriptFullPath%
 	CurrentUpdaterVersion := SubStr(CurrentUpdaterVersion, 1, -2)
 	SetWorkingDir, %A_Temp%
 	Menu, Tray, Tip, %_Updater% %CurrentUpdaterVersion%
 	Menu, Tray, NoStandard
 	Menu, Tray, Add, Show, TrayAction
-	Menu, Tray, Add, Portable, TrayAction
+;	Menu, Tray, Add, Portable, TrayAction
 	Menu, Tray, Add, WinUpdater, TrayAction
 	Menu, Tray, Add, Exit, TrayAction
 	Menu, Tray, Default, Show
@@ -109,12 +111,12 @@ Init() {
 	Gui, +HwndGuiHwnd -MaximizeBox
 	Gui, Color, 23222B
 	Gui, Add, Picture, x12 y10 w64 h64 Icon2, %A_ScriptFullPath%
-	Gui, Font, c00ACFF s22 w700, Segoe UI
-	Gui, Add, Text, x85 y4 BackgroundTrans, LibreWolf
+	Gui, Font, cC58FC1 s22 w700, Segoe UI
+	Gui, Add, Text, x85 y4 BackgroundTrans, Thorium
 	Gui, Font, cFFFFFF s9 w700
-	Gui, Add, Text, vVerField x86 y42 w222 BackgroundTrans
+	Gui, Add, Text, vVerField x86 y42 w222 BackgroundTrans, `n
 	Gui, Font, w400
-	Gui, Add, Progress, vProgField w217 h20 c00ACFF, 10
+	Gui, Add, Progress, vProgField w217 h20 cB483BB, 10
 	Gui, Add, Text, vLogField w222
 	Gui, Margin,, 15
 	Gui, Show, Hide, %_Updater% %CurrentUpdaterVersion%
@@ -147,7 +149,7 @@ TrayAction(ItemName, GuiEvent, LinkIndex) {
 	If (LinkIndex = 2)
 		ItemName := "WinUpdater"
 
-	Url := "https://codeberg.org/ltguillaume/librewolf-" ItemName
+	Url := "https://codeberg.org/ltguillaume/thorium-" ItemName
 	Try Run, %Url%
 	Catch {
 		RegRead, DefBrowser, HKCR, .html
@@ -160,25 +162,25 @@ TrayAction(ItemName, GuiEvent, LinkIndex) {
 
 CheckPaths() {
 	If (IsPortable)
-		Path := A_ScriptDir "\LibreWolf\librewolf.exe"
+		Path := A_ScriptDir "\bin\thorium.exe"
 	Else {
 		IniRead, Path, %IniFile%, Settings, Path, 0	; Need to use 0, because False would become a string
 		If (!Path) {
-			RegRead, Path, HKLM\SOFTWARE\Clients\StartMenuInternet\LibreWolf\shell\open\command
+			RegRead, Path, HKLM\SOFTWARE\Clients\StartMenuInternet\Thorium\shell\open\command
 			If (ErrorLevel)
-				Path = %ProgramW6432%\LibreWolf\%LibreWolfExe%
+				Path = %LocalAppData%\Thorium\Application\%ThoriumExe%
 		}
 
 		Path := Trim(Path, """")	; FileExist chokes on double quotes
-		If (!FileExist(Path))
-			Path = %A_ProgramFiles%\LibreWolf\%LibreWolfExe%
+;		If (!FileExist(Path))
+;			Path = %A_ProgramFiles%\Thorium\%ThoriumExe%
 	}
 ;MsgBox, Path = %Path%
 
 	CheckPath:
 	If (!FileExist(Path)) {
 		MsgBox, 48, %_Updater%, %_GetPathError%
-		FileSelectFile, Path, 3, %Path%, %_SelectFileTitle%, %LibreWolfExe%
+		FileSelectFile, Path, 3, %Path%, %_SelectFileTitle%, %ThoriumExe%
 		If (ErrorLevel)
 			ExitApp
 		Else {
@@ -215,7 +217,7 @@ SelfUpdate() {
 	If (GetLatestVersion() = CurrentUpdaterVersion)
 		Return
 
-	RegExMatch(ReleaseInfo, "i)name"":""librewolf-winupdater.+?\.zip"".*?browser_download_url"":""(.*?)""", DownloadUrl)
+	RegExMatch(ReleaseInfo, "i)name"":""thorium-winupdater.+?\.zip"".*?browser_download_url"":""(.*?)""", DownloadUrl)
 	If (!DownloadUrl1)
 		Return Log("SelfUpdate", _FindUrlError, True)
 
@@ -243,13 +245,13 @@ SelfUpdate() {
 }
 
 CheckWriteAccess() {
-	If (!FileExist(A_ScriptDir "\" LibreWolfExe)) {
+	If (!FileExist(A_ScriptDir "\" ThoriumExe)) {
 		FileAppend,, %IniFile%
 		If (!ErrorLevel)
 			Return
 	}
 
-	AppData := A_AppData "\LibreWolf\WinUpdater"
+	AppData := LocalAppData "\Thorium\WinUpdater"
 
 	If (IsPortable Or A_ScriptDir = AppData)
 		Die(_WritePermError, A_ScriptDir)
@@ -272,19 +274,19 @@ CheckWriteAccess() {
 
 GetCurrentVersion() {
 	; by SKAN and Drugwash https://www.autohotkey.com/board/topic/70777-how-to-get-autohotkeyexe-build-information-from-file/?p=448263
-	Call := DllCall("GetBinaryTypeW", "Str", "\\?\" Path, "UInt *", Build)
-	If (Call And Build = 6)
-		Build := "x86_64"
-	Else If (Call And Build = 0)
-		Build := "i686"
-	Else
-		Die(_GetBuildError)
+;	Call := DllCall("GetBinaryTypeW", "Str", "\\?\" Path, "UInt *", Build)
+;	If (Call And Build = 6)
+;		Build := "x86_64"
+;	Else If (Call And Build = 0)
+;		Build := "i686"
+;	Else
+;		Die(_GetBuildError)
 
 	; FileVersion() by SKAN https://www.autohotkey.com/boards/viewtopic.php?&t=4282
 	If (Sz := DllCall("Version\GetFileVersionInfoSizeW", "WStr", Path, "Int", 0))
 		If (DllCall("Version\GetFileVersionInfoW", "WStr", Path, "Int", 0, "UInt", VarSetCapacity(V, Sz), "Str", V))
-			If (DllCall("Version\VerQueryValueW", "Str", V, "WStr", "\StringFileInfo\000004B0\ProductVersion", "PtrP", pInfo, "Int", 0))
-				CurrentVersion := StrGet(pInfo, "UTF-16")
+			If (DllCall("Version\VerQueryValueW", "Str", V, "WStr", "\StringFileInfo\040904B0\ProductVersion", "PtrP", pInfo, "Int", 0))
+				CurrentVersion := "M" StrGet(pInfo, "UTF-16")
 
 	If (!CurrentVersion)
 		Die(_GetVersionError, Path)
@@ -293,13 +295,13 @@ GetCurrentVersion() {
 }
 
 CheckConnection() {
-	If (!Download("https://gitlab.com/manifest.json"))
+	If (!Download("https://github.com/manifest.json"))
 		Die(_NoConnectionError,, False)	; Don't show this if not Scheduled
 }
 
 GetNewVersion() {
 	Progress(_Checking)
-	Task := _LibreWolf
+	Task := _Thorium
 	NewVersion := GetLatestVersion()
 ;MsgBox, ReleaseInfo = %ReleaseInfo%`nCurrentVersion = %CurrentVersion%`nNewVersion = %NewVersion%
 	IniRead, LastUpdateTo, %IniFile%, Log, LastUpdateTo, False
@@ -312,7 +314,7 @@ GetNewVersion() {
 }
 
 StartUpdate() {
-	GuiControl,, VerField, %CurrentVersion% %_To% %NewVersion% (%Build%)
+	GuiControl,, VerField, %CurrentVersion% %_To%`n%NewVersion% (%Build%)
 	If (Portable Or !Scheduled)
 		GuiShow()
 
@@ -320,7 +322,7 @@ StartUpdate() {
 }
 
 WaitForClose() {
-	; Notify and wait if LibreWolf is running
+	; Notify and wait if Thorium is running
 	PathDS   := StrReplace(Path, "\", "\\")
 	Wait:
 	For Proc in ComObjGet("winmgmts:").ExecQuery("Select ProcessId from Win32_Process where ExecutablePath=""" PathDS """") {
@@ -342,8 +344,8 @@ WaitForClose() {
 
 DownloadUpdate() {
 	; Get setup file URL
-	FilenameEnd := Build (IsPortable ? "-portable\.zip" : "-setup\.exe")
-	RegExMatch(ReleaseInfo, "i)""name"":""(librewolf-.{1,30}?" FilenameEnd ")"",\s*""url"":""(.+?)""", DownloadUrl)
+	FilenameEnd := IsPortable ? "\.zip" : "installer\.exe"
+	RegExMatch(ReleaseInfo, "i)""name"":""(thorium.{1,30}?" FilenameEnd ")"",.*?""browser_download_url"":""(.+?)""", DownloadUrl)
 ;MsgBox, Downloading`n%DownloadUrl2%`nto`n%DownloadUrl1%
 	If (!DownloadUrl1 Or !DownloadUrl2)
 		Die(_FindUrlError)
@@ -355,36 +357,36 @@ DownloadUpdate() {
 	If (!FileExist(SetupFile))
 		Die(_DownloadSetupError)
 
-	VerifyChecksum()
-}
+;	VerifyChecksum()
+;}
 
-VerifyChecksum() {
+;VerifyChecksum() {
 	; Get checksum file
-	RegExMatch(ReleaseInfo, "i)""name"":""sha256sums\.txt"",\s*""url"":""(.+?)""", ChecksumUrl)
-	If (!ChecksumUrl1)
-		Die(_FindSumsUrlError)
-	Checksum := Download(ChecksumUrl1)
+;	RegExMatch(ReleaseInfo, "i)""name"":""sha256sums\.txt"",.*?""browser_download_url"":""(.+?)""", ChecksumUrl)
+;	If (!ChecksumUrl1)
+;		Die(_FindSumsUrlError)
+;	Checksum := Download(ChecksumUrl1)
 
 	; Get checksum for downloaded file
-	RegExMatch(Checksum, "i)(\S+?)\s+\*?\Q" SetupFile "\E", Checksum)
-	If (!Checksum1)
-		Die(_FindChecksumError)
+;	RegExMatch(Checksum, "i)(\S+?)\s+\*?\Q" SetupFile "\E", Checksum)
+;	If (!Checksum1)
+;		Die(_FindChecksumError)
 
 	; Compare checksum with downloaded file
-	If (Checksum1 <> Hash(SetupFile))
-		Die(_ChecksumMatchError)
+;	If (Checksum1 <> Hash(SetupFile))
+;		Die(_ChecksumMatchError)
 
 	If (IsPortable)
 		ExtractPortable()
 	Else {
-		If (A_IsAdmin)
+;		If (A_IsAdmin)
 			Install()
-		Else {
-			Progress(_Downloaded)
-			Gui, Add, Button, vUpdateButton gInstall w148 x86 y110 Default, %_StartUpdate%
-			GuiControl, Move, TaskSetField, y146
-			GuiShow(True)	; Wait for user action
-		}
+;		Else {
+;			Progress(_Downloaded)
+;			Gui, Add, Button, vUpdateButton gInstall w148 x86 y125 Default, %_StartUpdate%
+;			GuiControl, Move, TaskSetField, y161
+;			GuiShow(True)	; Wait for user action
+;		}
 	}
 }
 
@@ -394,10 +396,11 @@ ExtractPortable() {
 	If (!Extract(A_Temp "\" SetupFile, ExtractDir))
 		Die(_ExtractionError)
 
-	Loop, Files, %ExtractDir%\*, D
-	{
+;	Loop, Files, %ExtractDir%\*, D
+;	{
 ;MsgBox, Traversing %A_LoopFilePath%
-		SetWorkingDir, %A_LoopFilePath%	; Enter the first folder of the extracted archive
+;		SetWorkingDir, %A_LoopFilePath%	; Enter the first folder of the extracted archive
+		SetWorkingDir, %ExtractDir%
 		Loop, Files, *, R
 		{
 			If (A_LoopFileName = UpdaterFile)
@@ -414,8 +417,9 @@ ExtractPortable() {
 				ChangesMade := True
 			}
 		}
-	}
+;	}
 	SetWorkingDir, %A_Temp%
+	FileRemoveDir, % A_ScriptDir "\bin\" SubStr(CurrentVersion, 2), 1
 
 	WriteReport()
 }
@@ -425,7 +429,7 @@ Install() {
 	Progress(_Installing)
 	If (Scheduled)
 		Notify(_Installing, CurrentVersion " " _To " v" NewVersion, 3000)
-	Folder := StrReplace(Path, LibreWolfExe, "")
+	Folder := StrReplace(Path, ThoriumExe, "")
 ;MsgBox, %SetupFile% /S /D=%Folder%
 	; Run silent setup
 	RunWait, %SetupFile% /S /D=%Folder%,, UseErrorLevel
@@ -481,7 +485,7 @@ Exit(Restart = False) {
 		FileDelete, %SetupFile%
 	}
 	If (IsPortable)
-		FileRemoveDir, LibreWolf-Extracted, 1
+		FileRemoveDir, Thorium-Extracted, 1
 	FileDelete, %A_ScriptFullPath%.pbak
 	FileDelete, %SelfUpdateZip%
 
@@ -548,8 +552,8 @@ Extract(From, To) {
 
 GetLatestVersion() {
 	ReleaseUrl := (Task = _Updater
-		? "https://codeberg.org/api/v1/repos/ltguillaume/librewolf-winupdater/releases/latest"
-		: "https://gitlab.com/api/v4/projects/44042130/releases/permalink/latest")
+		? "https://codeberg.org/api/v1/repos/ltguillaume/thorium-winupdater/releases/latest"
+		: "https://api.github.com/repos/Alex313031/Thorium-" Build "/releases/latest")
 	ReleaseInfo := Download(ReleaseUrl)
 	If (!ReleaseInfo)
 		Die(_DownloadJsonError)
