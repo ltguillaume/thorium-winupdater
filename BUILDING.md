@@ -1,5 +1,5 @@
-<img src="Thorium-WinUpdater.ico" width="64">
-<img src="AHK.png" width="64" align="right">
+<img src="Thorium-WinUpdaterBlue.ico" width="64">
+<img src="AHK.png" width="64">
 
 # Building Thorium WinUpdater.exe
 
