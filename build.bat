@@ -1,9 +1,7 @@
 @echo off
 
-title="Building Thorium WinUpdater"
+title=Building Thorium WinUpdater
 
-C:\Program Files\AutoHotkey\Compiler\Ahk2Exe.exe /in "%~dp0%\Thorium-WinUpdater.ahk"
+"C:\Program Files\AutoHotkey\Compiler\Ahk2Exe.exe" /in "%~dp0%\Thorium-WinUpdater.ahk"
 
-echo "Done."
-
-exit 0
+echo  Done.
