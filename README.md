@@ -34,7 +34,7 @@ An attempt to make updating [Thorium for Windows](https://github.com/Alex313031/
  - __NOTE:__ The `Win` build is for systems lacking [AVX2 instructions](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions#CPUs_with_AVX2). The `Win7` builds are for Windows 7/8/8.1 systems, because of Chromium deprecating support for these OSes as per [Here](https://support.google.com/chrome/thread/185534985/).
 
 ## Building
- - Requires [AutoHotKey](https://www.autohotkey.com/) \
+ - Requires [AutoHotKey 1.1](https://www.autohotkey.com/) \
  See [BUILDING.md](https://github.com/Alex313031/thorium-winupdater/blob/main/BUILDING.md)
 
 ## Credits

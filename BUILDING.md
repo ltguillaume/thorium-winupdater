@@ -3,7 +3,7 @@
 
 # Building Thorium WinUpdater.exe
 
-Building this project requires [AutoHotKey](https://www.autohotkey.com/). \
+Building this project requires [AutoHotKey 1.1](https://www.autohotkey.com/). \
 AutoHotKey is a free and open-source custom scripting language for Microsoft Windows, for creating simple applications, macros, or (as the name implies) custom, OS level keyboard shortcuts.
 
 The [.ahk file](Thorium-WinUpdater.ahk) is the main script. \
