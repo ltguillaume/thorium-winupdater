@@ -1,12 +1,15 @@
 ; Thorium WinUpdater - https://codeberg.org/ltguillaume/thorium-winupdater
-;@Ahk2Exe-SetFileVersion 1.7.11
+;@Ahk2Exe-SetFileVersion 1.7.12
+;@Ahk2Exe-SetProductVersion 1.7.12
 
 ;@Ahk2Exe-Base Unicode 32*
 ;@Ahk2Exe-SetCompanyName The Chromium Authors and Alex313031
-;@Ahk2Exe-SetDescription Thorium WinUpdater
+;@Ahk2Exe-SetCopyright ltguillaume and Alex313031
+;@Ahk2Exe-SetDescription Thorium Browser Windows Updater
 ;@Ahk2Exe-SetMainIcon Thorium-WinUpdater.ico
 ;@Ahk2Exe-AddResource Thorium-WinUpdaterLogo.ico, 160
 ;@Ahk2Exe-SetOrigFilename Thorium-WinUpdater.exe
+;@Ahk2Exe-SetProductName Thorium WinUpdater
 ;@Ahk2Exe-PostExec ResourceHacker.exe -open "%A_WorkFileName%" -save "%A_WorkFileName%" -action delete -mask ICONGROUP`,206`, ,,,,1
 ;@Ahk2Exe-PostExec ResourceHacker.exe -open "%A_WorkFileName%" -save "%A_WorkFileName%" -action delete -mask ICONGROUP`,207`, ,,,,1
 ;@Ahk2Exe-PostExec ResourceHacker.exe -open "%A_WorkFileName%" -save "%A_WorkFileName%" -action delete -mask ICONGROUP`,208`, ,,,,1
@@ -38,7 +41,7 @@ Global _Thorium       := "Thorium"
 , _IsElevated         := "To set up scheduled tasks properly, please do not run WinUpdater as administrator."
 , _NoDefaultBrowser   := "Could not open your default browser."
 , _Checking           := "Checking for new version..."
-, _SetTask            := "Schedule a task for automatic update checks while`nuser {} is logged on."
+, _SetTask            := "Schedule a task for automatic update checks while`nuser '{}' is logged on."
 , _SettingTask        := (A_Args[1] = "/CreateTask" ? "Creating" : "Removing") " scheduled task..."
 , _Done               := " Done."
 , _GetPathError       := "Could not find the path to Thorium.`nBrowse to " ThoriumExe " in the following dialog."
