@@ -10,7 +10,7 @@
 ;@Ahk2Exe-AddResource Thorium-WinUpdaterLogo.ico, 160
 ;@Ahk2Exe-AddResource Thorium-WinUpdaterBlue.ico, 161
 ;@Ahk2Exe-SetOrigFilename Thorium-WinUpdater.exe
-;@Ahk2Exe-SetProductName Thorium-WinUpdater
+;@Ahk2Exe-SetProductName Thorium WinUpdater
 ;@Ahk2Exe-PostExec ResourceHacker.exe -open "%A_WorkFileName%" -save "%A_WorkFileName%" -action delete -mask ICONGROUP`,206`, ,,,,1
 ;@Ahk2Exe-PostExec ResourceHacker.exe -open "%A_WorkFileName%" -save "%A_WorkFileName%" -action delete -mask ICONGROUP`,207`, ,,,,1
 ;@Ahk2Exe-PostExec ResourceHacker.exe -open "%A_WorkFileName%" -save "%A_WorkFileName%" -action delete -mask ICONGROUP`,208`, ,,,,1
