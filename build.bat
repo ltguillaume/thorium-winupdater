@@ -8,4 +8,4 @@ cd /d "%~dp0"
 
 Ahk2Exe.exe /in Thorium-WinUpdater.ahk
 
-set /p =Done.
+echo Done.
