@@ -2,8 +2,10 @@
 
 title=Building Thorium WinUpdater
 
-set PATH=%PATH%;%~dp0%
+set PATH=%PATH%;%ProgramFiles%\AutoHotkey\Compiler
 
-"C:\Program Files\AutoHotkey\Compiler\Ahk2Exe.exe" /in "%~dp0%\Thorium-WinUpdater.ahk"
+cd /d "%~dp0"
 
-echo  Done.
+Ahk2Exe.exe /in Thorium-WinUpdater.ahk
+
+set /p =Done.
