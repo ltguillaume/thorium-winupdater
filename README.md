@@ -18,8 +18,8 @@ An attempt to make updating [Thorium for Windows](https://github.com/Alex313031/
  - If Thorium is already running, the updater will notify you of the new version. The update will start as soon as you close the browser.
 
 ## Remarks
- - The updater needs to be able to write to `Thorium-WinUpdater.ini` in its own folder(so make sure it has permission to do so), otherwise WinUpdater will copy itself to `%LocalAppData%\Thorium\WinUpdater` and run from there.
- - `Thorium-WinUpdater.ini` contains a `[Log]` section that shows the results of the last update check and update action(s).
+ - The updater needs to be able to write to `Thorium-WinUpdater.ini` in its own folder (so make sure it has permission to do so), otherwise WinUpdater will copy itself to `%LocalAppData%\Thorium\WinUpdater` and run from there.
+ - `Thorium-WinUpdater.ini` contains a `[Log]` section that shows the results of the last update check and update action.
  - Thorium WinUpdater also updates itself automatically, so you won't have to check for new releases here. If you prefer to update WinUpdater yourself, add the following to the .ini file:
   ```ini
   [Settings]
@@ -39,6 +39,6 @@ An attempt to make updating [Thorium for Windows](https://github.com/Alex313031/
 
 ## Credits
 * [Thorium](https://thorium.rocks) by [Alex Frick](https://github.com/Alex313031)
-* The Chromium Project > https://www.chromium.org/
-* Original icon by [Alex Frick](https://github.com/Alex313031/thorium/blob/main/logos/NEW/win/thorium.ico)
-* Original logo by [Alex Frick](https://github.com/Alex313031/thorium/blob/main/logos/STAGING/Thorium90_252.jpg)
+* [The Chromium Project](https://www.chromium.org)
+* [Original icon](https://github.com/Alex313031/thorium/blob/main/logos/NEW/win/thorium.ico) by Alex Frick
+* [Original logo](https://github.com/Alex313031/thorium/blob/main/logos/STAGING/Thorium90_252.jpg) by Alex Frick
