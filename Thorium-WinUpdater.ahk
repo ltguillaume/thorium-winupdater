@@ -26,7 +26,7 @@ Global Args       := ""
 , ConnectCheckUrl := "https://github.com/manifest.json"
 , ReleaseApiUrl   := "https://api.github.com/repos/Alex313031/Thorium-{}/releases/latest"
 , SelfUpdateZip   := Browser "-WinUpdater.zip"
-, SetupParams     := "--do-not-create-any-shortcuts --do-not-launch-chrome"
+, SetupParams     := "--do-not-launch-chrome"
 , TaskCreateFile  := "ScheduledTask-Create.ps1"
 , TaskRemoveFile  := "ScheduledTask-Remove.ps1"
 , UpdaterFile     := Browser "-WinUpdater.exe"
@@ -80,12 +80,12 @@ Global _Updater       := Browser " WinUpdater"
 , _GoToWebsite        := "<a>Restart WinUpdater</a> or visit the <a>project website</a> for help."
 
 Init()
-CheckPaths()
 CheckArgs()
+CheckPaths()
 GetCurrentVersion()
 If (ThisUpdaterRunning())
 	Die(_IsRunningError,, !Scheduled)	; Show only if not scheduled
-Unelevate(A_ScriptFullPath, "/Restart " Args, A_ScriptDir)
+Unelevate()
 CheckWriteAccess()
 If (SettingTask)
 	TaskSet()
@@ -166,6 +166,16 @@ TrayAction(ItemName, GuiEvent, LinkIndex) {
 	}
 }
 
+CheckArgs() {
+	Args := ""
+	For i, Arg in A_Args
+	{
+		If (InStr(Arg, A_Space))
+			Arg := """" Arg """"
+		Args .= " " Arg
+	}
+}
+
 CheckPaths() {
 	If (IsPortable)
 		Path := A_ScriptDir "\" BrowserPortable
@@ -180,6 +190,8 @@ CheckPaths() {
 
 		If (FileExist(Path) And (InStr(Path, ProgramW6432) Or InStr(Path, A_ProgramFiles)))
 			SetupParams .= " --system-level"
+		Else If (A_IsAdmin And !IsPortable)
+			Unelevate(True)
 	}
 ;MsgBox, Path = %Path%`nSetupParams = %SetupParams%
 
@@ -193,16 +205,6 @@ CheckPaths() {
 			IniWrite, %Path%, %IniFile%, Settings, Path
 			Goto, CheckPath
 		}
-	}
-}
-
-CheckArgs() {
-	Args := ""
-	For i, Arg in A_Args
-	{
-		If (InStr(Arg, A_Space))
-			Arg := """" Arg """"
-		Args .= " " Arg
 	}
 }
 
@@ -754,10 +756,17 @@ TaskSet() {
 	}
 }
 
-Unelevate(Prms*) {
-	If (!A_IsAdmin Or IsPortable Or Scheduled Or RegExMatch(DllCall("GetCommandLine", "str"), " /Restart(?!\S)"))
+Unelevate(Forced = False) {
+	If (!A_IsAdmin Or IsPortable Or (Scheduled And !Forced) Or RegExMatch(DllCall("GetCommandLine", "str"), " /Restart(?!\S)"))
 		Return
 
+	If (RunUnelevated(A_ScriptFullPath, "/Restart " Args, A_ScriptDir))
+		ExitApp
+	Else
+		Die(_IsElevated)
+}
+
+RunUnelevated(Prms*) {
 	; ShellRun(Prms*) from AutoHotkey's Installer.ahk
 	Try {
 		ShellWindows := ComObjCreate("Shell.Application").Windows
@@ -779,7 +788,7 @@ Unelevate(Prms*) {
 				}
 				ObjRelease(Ptlb)
 		}
-		ExitApp
+		Return True
 	} Catch e
-		Die(_IsElevated)
+		Return False
 }
