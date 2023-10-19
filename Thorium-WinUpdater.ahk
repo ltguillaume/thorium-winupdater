@@ -1,6 +1,6 @@
 ; Thorium WinUpdater - https://codeberg.org/ltguillaume/thorium-winupdater
-;@Ahk2Exe-SetFileVersion 1.8.0
-;@Ahk2Exe-SetProductVersion 1.8.0
+;@Ahk2Exe-SetFileVersion 1.8.1
+;@Ahk2Exe-SetProductVersion 1.8.1
 
 ;@Ahk2Exe-Base Unicode 32*
 ;@Ahk2Exe-SetCompanyName The Chromium Authors and Alex313031
@@ -221,8 +221,8 @@ ThisUpdaterRunning() {
 
 SelfUpdate() {
 	Task := _Updater
-;MsgBox, % GetLatestVersion() " = " CurrentUpdaterVersion
-	If (GetLatestVersion() = CurrentUpdaterVersion)
+;MsgBox, % GetLatestVersion() " > " CurrentUpdaterVersion
+	If (!VerCompare(GetLatestVersion(), ">" CurrentUpdaterVersion))
 		Return
 
 RegExp := "i)name"":""" Browser "-WinUpdater.+?\.zip"".*?browser_download_url"":""(.*?)"""
@@ -364,7 +364,7 @@ WaitForClose() {
 DownloadUpdate() {
 	; Get setup file URL
 	FilenameEnd := Build (IsPortable ? "\.zip" : "installer\.exe")
-FileAppend, %ReleaseInfo%, %A_Temp%\ReleaseInfo.txt
+;FileAppend, %ReleaseInfo%, %A_Temp%\ReleaseInfo.txt
 	RegExMatch(ReleaseInfo, "i)""name"":""(" Browser ".{1,30}?" FilenameEnd ")"".*?""browser_download_url"":""(.+?)""", DownloadUrl)
 ;MsgBox, Downloading`n%DownloadUrl2%`nto`n%DownloadUrl1%
 	If (!DownloadUrl1 Or !DownloadUrl2)
@@ -462,8 +462,8 @@ Install() {
 ;			Progress(_UpdateError, True)
 ;		Else {
 			RunWait, %SetupFile% %SetupParams%,, UseErrorLevel
-			If (ErrorLevel)
-				Progress(_UpdateError, True)
+			If (ErrorLevel Or !FileExist(Folder NewVersion))
+				Die(_UpdateError (ErrorLevel ? " " A_LastError : ""))
 			Else
 				WriteReport()
 ;		}
