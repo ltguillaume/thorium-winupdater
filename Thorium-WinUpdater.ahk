@@ -235,7 +235,7 @@ RegExp := "i)name"":""" Browser "-WinUpdater.+?\.zip"".*?browser_download_url"":
 	If (!FileExist(SelfUpdateZip))
 		Return Log("SelfUpdate", _DownloadSelfError, True)
 ;MsgBox, Extracting Self-Update
-	FileMove, %A_ScriptFullPath%, %A_ScriptFullPath%.pbak, 1
+	FileMove, %A_ScriptFullPath%, %A_ScriptFullPath%.wubak, 1
 	If (!Extract(A_Temp "\" SelfUpdateZip, A_ScriptDir))
 		Return Log("SelfUpdate", _ExtractionError, True)
 
@@ -507,7 +507,7 @@ Exit(Restart = False) {
 	}
 	If (IsPortable)
 		FileRemoveDir, %ExtractDir%, 1
-	FileDelete, %A_ScriptFullPath%.pbak
+	FileDelete, %A_ScriptFullPath%.wubak
 	FileDelete, %SelfUpdateZip%
 
 	If (Restart)
