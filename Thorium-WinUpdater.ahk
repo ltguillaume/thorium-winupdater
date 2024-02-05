@@ -225,7 +225,7 @@ SelfUpdate() {
 	If (!VerCompare(GetLatestVersion(), ">" CurrentUpdaterVersion))
 		Return
 
-RegExp := "i)name"":""" Browser "-WinUpdater.+?\.zip"".*?browser_download_url"":""(.*?)"""
+	RegExp := "i)name"":""" Browser "-WinUpdater.+?\.zip"".*?browser_download_url"":""(.*?)"""
 	RegExMatch(ReleaseInfo, RegExp, DownloadUrl)
 ;MsgBox, %DownloadUrl1%
 	If (!DownloadUrl1)
@@ -521,7 +521,7 @@ Die(Error, Var = False, Show = True) {
 	If (Var)
 		Error := StrReplace(Error, "{}", Var)
 	Error := StrReplace(Error, "{Task}", Task)
-	IniWrite, %Error%, %IniFile%, Log, LastResult
+	Log("LastResult", Error)
 	GuiControl, Hide, ProgField
 	GuiControl, Hide, LogField
 	GuiControl, Disable, TaskSetField
@@ -541,10 +541,10 @@ Die(Error, Var = False, Show = True) {
 
 Download(URL) {
 	Try {
-		Object := ComObjCreate("WinHttp.WinHttpRequest.5.1")
-		Object.Open("GET", URL)
-		Object.Send()
-		Result := Object.ResponseText
+		Object := ComObjCreate("Msxml2.XMLHTTP")
+		Object.open("GET", URL, false)
+		Object.send()
+		Result := Object.responseText
 ;MsgBox, %Result%
 		Return Result
 	} Catch {
@@ -700,6 +700,7 @@ Log(Key, Msg = "", PrefixTime = False) {
 		FormatTime, CurrentTime
 		Msg := CurrentTime " " Msg
 	}
+	Msg := StrReplace(Msg, "`n", " ")
 	IniWrite, %Msg%, %IniFile%, Log, %Key%
 }
 
