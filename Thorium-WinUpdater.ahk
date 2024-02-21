@@ -1,6 +1,6 @@
 ; Thorium WinUpdater - https://codeberg.org/ltguillaume/thorium-winupdater
-;@Ahk2Exe-SetFileVersion 1.8.1
-;@Ahk2Exe-SetProductVersion 1.8.1
+;@Ahk2Exe-SetFileVersion 1.8.3
+;@Ahk2Exe-SetProductVersion 1.8.3
 
 ;@Ahk2Exe-Base Unicode 32*
 ;@Ahk2Exe-SetCompanyName The Chromium Authors and Alex313031
@@ -21,16 +21,18 @@ Global Args       := ""
 , Browser         := "Thorium"
 , ExtractDir      := A_Temp "\" Browser "-Extracted"
 , BrowserExe      := "thorium.exe"
-, BrowserPortable := "Bin\" BrowserExe
-, PortableExe     := A_ScriptDir "\" Browser "-Portable.exe"
+, PortableDir     := A_ScriptDir "\Bin"
+, PortableBrowser := PortableDir "\" BrowserExe
 , ConnectCheckUrl := "https://github.com/manifest.json"
+, InstallerFile   := "installer\.exe"
+, PortableFile    := "\.zip"
 , ReleaseApiUrl   := "https://api.github.com/repos/Alex313031/Thorium-{}/releases/latest"
 , SelfUpdateZip   := Browser "-WinUpdater.zip"
 , SetupParams     := "--do-not-launch-chrome"
 , TaskCreateFile  := "ScheduledTask-Create.ps1"
 , TaskRemoveFile  := "ScheduledTask-Remove.ps1"
 , UpdaterFile     := Browser "-WinUpdater.exe"
-, IsPortable      := FileExist(A_ScriptDir "\" BrowserPortable)
+, IsPortable      := FileExist(PortableBrowser)
 , RunningPortable := A_Args[1] = "/Portable"
 , Scheduled       := A_Args[1] = "/Scheduled"
 , SettingTask     := A_Args[1] = "/CreateTask" Or A_Args[1] = "/RemoveTask"
@@ -61,6 +63,7 @@ Global _Updater       := Browser " WinUpdater"
 , _DownloadSelfError  := "Could not download the new WinUpdater version."
 , _DownloadSetupError := "Could not download the setup file."
 , _Downloaded         := "New version downloaded."
+, _CheckingHash       := "Checking file integrity..."
 , _FindSumsUrlError   := "Could not find the URL to the checksum file."
 , _FindChecksumError  := "Could not find the checksum for the downloaded file."
 , _ChecksumMatchError := "The file checksum did not match, so it's possible the download failed."
@@ -178,7 +181,7 @@ CheckArgs() {
 
 CheckPaths() {
 	If (IsPortable)
-		Path := A_ScriptDir "\" BrowserPortable
+		Path := PortableBrowser
 	Else {
 		IniRead, Path, %IniFile%, Settings, Path, 0	; Need to use 0, because False would become a string
 		If (!Path) {
@@ -225,7 +228,7 @@ SelfUpdate() {
 	If (!VerCompare(GetLatestVersion(), ">" CurrentUpdaterVersion))
 		Return
 
-	RegExp := "i)name"":""" Browser "-WinUpdater.+?\.zip"".*?browser_download_url"":""(.*?)"""
+	RegExp := "i)name"":\s*""" Browser "-WinUpdater.+?\.zip"".*?browser_download_url"":\s*""(.*?)"""
 	RegExMatch(ReleaseInfo, RegExp, DownloadUrl)
 ;MsgBox, %DownloadUrl1%
 	If (!DownloadUrl1)
@@ -294,7 +297,7 @@ GetCurrentVersion() {
 
 	GetCurrentBuild()
 
-	GuiControl,, VerField, %CurrentVersion% (%Repo%%Build%)
+	GuiControl,, VerField, %CurrentVersion% (%Repo%/%Build%)
 }
 
 GetCurrentBuild() {
@@ -304,13 +307,26 @@ GetCurrentBuild() {
 	FileReadLine, Repo, %VerFile%, 1
 	If (ErrorLevel)
 		Die(_GetBuildError)
-	If (Repo = "AVX")	; Legacy
-		Repo := "Win"
-	If (Repo <> "Win7")
-		Return
+
 	FileReadLine, Build, %VerFile%, 2
 	If (!ErrorLevel)
-		Build := "_" Build
+		Build := Build
+	Else Switch Repo {	; Legacy
+		Case "AVX", "Win":
+			Repo  := "Win"
+			Build := "AVX"
+			Return
+		Case "Special", "SSE3":
+			Repo  := "Win"
+			Build := "SSE3"
+			Return
+		Default:
+			If (InStr(Repo, "-")) {
+				Split := StrSplit(Repo, "-")
+				Repo  := Split[1]
+				Build := Split[2]
+			} Else Die(_GetBuildError)
+	}
 }
 
 CheckConnection() {
@@ -333,11 +349,12 @@ GetNewVersion() {
 }
 
 StartUpdate() {
-	GuiControl,, VerField, %CurrentVersion% %_To%`n%NewVersion% (%Repo%%Build%)
+	GuiControl,, VerField, %CurrentVersion% %_To%`n%NewVersion% (%Repo%/%Build%)
 	If (Portable Or !Scheduled)
 		GuiShow()
 
 	WaitForClose()
+	DownloadUpdate()
 }
 
 WaitForClose() {
@@ -357,15 +374,13 @@ WaitForClose() {
 	; Check for newer version since notification was shown
 	If (Notified And GetNewVersion())
 		WaitForClose()
-
-	DownloadUpdate()
 }
 
 DownloadUpdate() {
 	; Get setup file URL
-	FilenameEnd := Build (IsPortable ? "\.zip" : "installer\.exe")
+	FileNameEnd := IsPortable ? PortableFile : InstallerFile
 ;FileAppend, %ReleaseInfo%, %A_Temp%\ReleaseInfo.txt
-	RegExMatch(ReleaseInfo, "i)""name"":""(" Browser ".{1,30}?" FilenameEnd ")"".*?""browser_download_url"":""(.+?)""", DownloadUrl)
+	RegExMatch(ReleaseInfo, "i)""name"":\s*""(" Browser "_" Build "_.{1,30}?" FilenameEnd ")"".+?""browser_download_url"":\s*""(.+?)""", DownloadUrl)
 ;MsgBox, Downloading`n%DownloadUrl2%`nto`n%DownloadUrl1%
 	If (!DownloadUrl1 Or !DownloadUrl2)
 		Die(_FindUrlError)
@@ -377,12 +392,12 @@ DownloadUpdate() {
 	If (!FileExist(SetupFile))
 		Die(_DownloadSetupError)
 
-;	VerifyChecksum()
-;}
+	VerifyChecksum()
+}
 
-;VerifyChecksum() {
+VerifyChecksum() {	; Skipped
 	; Get checksum file
-;	RegExMatch(ReleaseInfo, "i)""name"":""sha256sums\.txt"",.*?""browser_download_url"":""(.+?)""", ChecksumUrl)
+;	RegExMatch(ReleaseInfo, "i)""name"":\s*""sha256sums\.txt"",.*?""browser_download_url"":\s*""(.+?)""", ChecksumUrl)
 ;	If (!ChecksumUrl1)
 ;		Die(_FindSumsUrlError)
 ;	Checksum := Download(ChecksumUrl1)
@@ -396,6 +411,10 @@ DownloadUpdate() {
 ;	If (Checksum1 <> Hash(SetupFile))
 ;		Die(_ChecksumMatchError)
 
+	RunUpdate()
+}
+
+RunUpdate() {
 	If (IsPortable)
 		ExtractPortable()
 	Else {
@@ -411,6 +430,8 @@ DownloadUpdate() {
 }
 
 ExtractPortable() {
+	WaitForClose()
+	PreventRunningWhileUpdating()
 ; Extract archive of portable version
 	Progress(_Extracting)
 	If (!Extract(A_Temp "\" SetupFile, ExtractDir))
@@ -446,6 +467,8 @@ ExtractPortable() {
 
 Install() {
 	GuiControl, Disable, UpdateButton
+	WaitForClose()
+	PreventRunningWhileUpdating()
 	Progress(_Installing)
 	If (Scheduled)
 		Notify(_Installing, CurrentVersion " " _To " v" NewVersion, 3000)
@@ -470,9 +493,14 @@ Install() {
 ;	}
 }
 
+PreventRunningWhileUpdating() {
+	If (A_IsAdmin Or IsPortable)
+		FileMove, %Path%, %Path%.wubak, 1
+}
+
 WriteReport() {
 	; Report update if completed
-	Log("LastUpdate", "(" Repo Build ")", True)
+	Log("LastUpdate", "(" Repo "/" Build ")", True)
 	Log("LastUpdateFrom", CurrentVersion)
 	Log("LastUpdateTo", NewVersion)
 	Log("LastResult", _IsUpdated)
@@ -494,12 +522,12 @@ Exit(Restart = False) {
 		Gui, Destroy
 
 ; Clean up
-	If (RunningPortable And FileExist(PortableExe)) {
-		A_Args.RemoveAt(1)	; Remove "/Portable" from array
-		CheckArgs()
+;	If (RunningPortable And FileExist(PortableBrowser)) {
+;		A_Args.RemoveAt(1)	; Remove "/Portable" from array
+;		CheckArgs()
 ;MsgBox, %Args%
-		Run, %PortableExe% %Args%
-	}
+;		Run, %PortableBrowser% %Args%
+;	}
 	Log("LastRun",, True)
 	If (SetupFile) {
 		Sleep, 2000
@@ -509,6 +537,12 @@ Exit(Restart = False) {
 		FileRemoveDir, %ExtractDir%, 1
 	FileDelete, %A_ScriptFullPath%.wubak
 	FileDelete, %SelfUpdateZip%
+	If (FileExist(Path ".wubak")) {
+		If (FileExist(Path))
+			FileDelete, %Path%.wubak
+		Else
+			FileMove, %Path%.wubak, %Path%
+	}
 
 	If (Restart)
 		Run, % A_ScriptFullPath StrReplace(Args, "/Scheduled")
@@ -574,10 +608,13 @@ Extract(From, To) {
 GetLatestVersion() {
 	ReleaseUrl := (Task = _Updater ? "https://codeberg.org/api/v1/repos/ltguillaume/" Browser "-winupdater/releases/latest" : StrReplace(ReleaseApiUrl, "{}", Repo))
 	ReleaseInfo := Download(ReleaseUrl)
-	If (!ReleaseInfo)
-		Die(_DownloadJsonError)
-
-	RegExMatch(ReleaseInfo, "i)tag_name"":""v?(.+?)""", Release)
+	If (!ReleaseInfo) {
+		If (Task = _Updater)
+			Return CurrentUpdaterVersion
+		Else
+			Die(_DownloadJsonError)
+	}
+	RegExMatch(ReleaseInfo, "i)tag_name"":\s*""M?(.+?)""", Release)
 	LatestVersion := Release1
 	If (!LatestVersion)
 		Die(_JsonVersionError)
@@ -718,7 +755,7 @@ Progress(Msg, End = False) {
 	GuiControl,, LogField, % SubStr(Msg, InStr(Msg, "`n") + 1)
 	If (End)
 		GuiControl,, ProgField, 100
-	Else
+	Else If (Msg <> _NewVersionFound)
 		GuiControl,, ProgField, +15
 	Menu, Tray, Tip, %Msg%
 
