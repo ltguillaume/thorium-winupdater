@@ -1,6 +1,6 @@
 ; Thorium WinUpdater - https://codeberg.org/ltguillaume/thorium-winupdater
-;@Ahk2Exe-SetFileVersion 1.8.3
-;@Ahk2Exe-SetProductVersion 1.8.3
+;@Ahk2Exe-SetFileVersion 1.8.4
+;@Ahk2Exe-SetProductVersion 1.8.4
 
 ;@Ahk2Exe-Base Unicode 32*
 ;@Ahk2Exe-SetCompanyName The Chromium Authors and Alex313031
@@ -616,8 +616,12 @@ GetLatestVersion() {
 	}
 	RegExMatch(ReleaseInfo, "i)tag_name"":\s*""M?(.+?)""", Release)
 	LatestVersion := Release1
-	If (!LatestVersion)
-		Die(_JsonVersionError)
+	If (!LatestVersion) {
+		If (Task = _Updater And InStr(ReleaseInfo, "{") <> 1)	; Codeberg non-JSON error page
+			Return CurrentUpdaterVersion
+		Else
+			Die(_JsonVersionError)
+	}
 
 	Return LatestVersion
 }
