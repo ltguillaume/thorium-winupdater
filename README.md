@@ -8,9 +8,9 @@ An attempt to make updating [Thorium for Windows](https://github.com/Alex313031/
 ![Thorium WinUpdater](SCREENSHOT.png)
 
 ## Usage
-- If you want to run the portable version of Thorium, download and extract [`Thorium_AVX2_xxx.x.xxxx.x.zip`](https://github.com/Alex313031/Thorium-Win-AVX2/releases). Put `Thorium-WinUpdater.exe` in the same folder.  
+- If you want to run the portable version of Thorium, download and extract [`Thorium_???_xxx.x.xxxx.x.zip`](https://github.com/Alex313031/Thorium-Win/releases). Put `Thorium-WinUpdater.exe` in the same folder.  
   Then, if you wish to perform an update, just run `Thorium-WinUpdater.exe`.
-- When you have installed Thorium using the [Thorium_AVX2_mini_installer.exe](https://github.com/Alex313031/Thorium-Win-AVX2/releases), just run `Thorium-WinUpdater.exe` from any location to check for updates. If one is available, the new mini installer will be downloaded immediately.
+- When you have installed Thorium using the [Thorium_???_mini_installer.exe](https://github.com/Alex313031/Thorium-Win/releases), just run `Thorium-WinUpdater.exe` from any location to check for updates. If one is available, the new mini installer will be downloaded immediately.
 
 ## Scheduled Updates
 - Run Thorium WinUpdater and select the option to automatically check for updates. This will prompt for administrative permissions and a blue (PowerShell) window will open and notify you of the result. The scheduled task will run while the current user account is logged on (at start-up and every 24 hours).
@@ -25,13 +25,8 @@ An attempt to make updating [Thorium for Windows](https://github.com/Alex313031/
   [Settings]
   UpdateSelf=0
   ```
-- Thorium by default downloads the AVX2 build. You can change the build to `Win` or `Win7` by adding the following to the .ini file:
-  ```ini
-  [Settings]
-  Build=Win7
-  ```
-  _Obviously, don't add the line `[Settings]` twice_.
-- __NOTE:__ The `Win` build is for systems lacking [AVX2 instructions](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions#CPUs_with_AVX2). The `Win7` builds are for Windows 7/8/8.1 systems, because of Chromium deprecating support for these OSes as per [Here](https://support.google.com/chrome/thread/185534985/).
+- Thorium should automatically detect which build you are currently using (e.g. `SSE3`, `AVX`, or `AVX2`) thanks to the `thor_ver` file. It'll show the detected version next to the version number in the UI and in the `[Log]` part of `Thorium-WinUpdater.ini`.
+- __NOTE:__ The `AVX` build is for systems lacking [AVX2 instructions](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions#CPUs_with_AVX2). The [Win7](https://github.com/Alex313031/Thorium-Win7/releases) builds are for Windows 7/8/8.1 systems, because of Chromium deprecating support for these OSes as per [here](https://support.google.com/chrome/thread/185534985/).
 
 ## Building
 - Requires [AutoHotKey 1.1](https://www.autohotkey.com/) \
