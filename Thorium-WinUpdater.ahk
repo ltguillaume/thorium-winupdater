@@ -1,6 +1,6 @@
 ; Thorium WinUpdater - https://codeberg.org/ltguillaume/thorium-winupdater
-;@Ahk2Exe-SetFileVersion 1.8.4
-;@Ahk2Exe-SetProductVersion 1.8.4
+;@Ahk2Exe-SetFileVersion 1.8.5
+;@Ahk2Exe-SetProductVersion 1.8.5
 
 ;@Ahk2Exe-Base Unicode 32*
 ;@Ahk2Exe-SetCompanyName The Chromium Authors and Alex313031
@@ -57,6 +57,7 @@ Global _Updater       := Browser " WinUpdater"
 , _GetBuildError      := "Could not determine the build type of " Browser "."
 , _GetVersionError    := "Could not determine the current version of`n{}"
 , _DownloadJsonError  := "Could not download the {Task} releases file."
+, _ApiRateLimit       := "GitHub's API rate limit was exceeded for your IP. You can try again later."
 , _JsonVersionError   := "Could not get version info from the {Task} releases file."
 , _FindUrlError       := "Could not find the URL to download {Task}."
 , _Downloading        := "Downloading new version..."
@@ -619,7 +620,14 @@ GetLatestVersion() {
 	If (!LatestVersion) {
 		If (Task = _Updater And InStr(ReleaseInfo, "{") <> 1)	; Codeberg non-JSON error page
 			Return CurrentUpdaterVersion
-		Else
+		Else If (InStr(ReleaseInfo, "API rate limit exceeded")) {	; GitHub API rate limit
+			If (!Scheduled)
+				Die(_ApiRateLimit)
+			Else {
+				Log("LastResult", _ApiRateLimit)
+				Exit()
+			}
+		} Else
 			Die(_JsonVersionError)
 	}
 
