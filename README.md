@@ -6,7 +6,9 @@ By ltGuillaume: [Codeberg](https://codeberg.org/ltGuillaume) | [GitHub](https://
 
 > [!CAUTION]  
 > ## Support has ended
-> I have decided to stop support for Thorium WinUpdater. This is primarily because of the lack of regular updates to the Thorium project, which leaves users vulnerable to 0-days for many months at a time. As such, I feel uncomfortable to recommend using Thorium by offering this updater. Additionally, due to a lack of proper release and naming conventions of the Thorium project, I have found it to be impossible to guarantee a reliant update flow via WinUpdater. For more information, see https://github.com/ltguillaume/thorium-winupdater/issues/7#issuecomment-2072405293. You are free to fork this repo to continue development. **I would greatly appreciate it if you dropped a note here if you are going to continue the project.**
+> I have decided to stop support for Thorium WinUpdater. This is primarily because of the lack of regular updates to the Thorium project, which leaves users vulnerable to 0-days for many months at a time. As such, I feel uncomfortable to recommend using Thorium by offering this updater. Additionally, due to a lack of proper release and naming conventions of the Thorium project, I have found it to be impossible to guarantee a reliable update flow via WinUpdater. For more information, see https://github.com/ltguillaume/thorium-winupdater/issues/7#issuecomment-2072405293. However, using [Chromium WinUpdater](https://codeberg.org/ltguillaume/chromium-winupdater) for Thorium may be possible if you set it up manually, but I will not support it.
+>
+> You are free to fork this repo to continue development. **I would greatly appreciate it if you dropped a note here if you are going to continue the project.**
 
 ![Thorium WinUpdater](SCREENSHOT.png)
 
